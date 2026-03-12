@@ -5,18 +5,23 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
-  redirect,
 } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useActor } from "./hooks/useActor";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import { useMyProfile } from "./hooks/useQueries";
+import AdminPage from "./pages/AdminPage";
+import CropAdvisorPage from "./pages/CropAdvisorPage";
 import DashboardPage from "./pages/DashboardPage";
+import EquipmentPage from "./pages/EquipmentPage";
 import LandingPage from "./pages/LandingPage";
+import MarketplacePage from "./pages/MarketplacePage";
+import MessagesPage from "./pages/MessagesPage";
 import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
+import SchemesPage from "./pages/SchemesPage";
+import StorePage from "./pages/StorePage";
 
-// Root route with auth logic wrapper
 const rootRoute = createRootRoute({
   component: () => (
     <>
@@ -31,67 +36,104 @@ const landingRoute = createRoute({
   path: "/",
   component: LandingPage,
 });
-
 const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/register",
   component: RegisterPage,
 });
-
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard",
   component: ProtectedDashboard,
 });
-
 const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/profile",
   component: ProtectedProfile,
 });
+const marketplaceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/marketplace",
+  component: MarketplacePage,
+});
+const storeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/store",
+  component: StorePage,
+});
+const equipmentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/equipment",
+  component: EquipmentPage,
+});
+const cropAdvisorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/crop-advisor",
+  component: ProtectedCropAdvisor,
+});
+const schemesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/schemes",
+  component: SchemesPage,
+});
+const messagesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/messages",
+  component: ProtectedMessages,
+});
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin",
+  component: AdminPage,
+});
 
-function ProtectedDashboard() {
+function useAuthGuard() {
   const { identity, isInitializing } = useInternetIdentity();
   const { actor, isFetching } = useActor();
   const { data: profile, isLoading } = useMyProfile();
+  return { identity, isInitializing, actor, isFetching, profile, isLoading };
+}
 
-  if (isInitializing || isFetching || isLoading) {
-    return <LoadingScreen />;
-  }
-
+function ProtectedDashboard() {
+  const { identity, isInitializing, actor, isFetching, profile, isLoading } =
+    useAuthGuard();
+  if (isInitializing || isFetching || isLoading) return <LoadingScreen />;
   if (!identity) {
     window.location.href = "/";
     return null;
   }
-
   if (actor && !isLoading && profile === null) {
     window.location.href = "/register";
     return null;
   }
-
   return <DashboardPage />;
 }
 
 function ProtectedProfile() {
-  const { identity, isInitializing } = useInternetIdentity();
-  const { actor, isFetching } = useActor();
-  const { data: profile, isLoading } = useMyProfile();
-
-  if (isInitializing || isFetching || isLoading) {
-    return <LoadingScreen />;
-  }
-
+  const { identity, isInitializing, actor, isFetching, profile, isLoading } =
+    useAuthGuard();
+  if (isInitializing || isFetching || isLoading) return <LoadingScreen />;
   if (!identity) {
     window.location.href = "/";
     return null;
   }
-
   if (actor && !isLoading && profile === null) {
     window.location.href = "/register";
     return null;
   }
-
   return <ProfilePage />;
+}
+
+function ProtectedCropAdvisor() {
+  const { isInitializing, isFetching, isLoading } = useAuthGuard();
+  if (isInitializing || isFetching || isLoading) return <LoadingScreen />;
+  return <CropAdvisorPage />;
+}
+
+function ProtectedMessages() {
+  const { isInitializing, isFetching, isLoading } = useAuthGuard();
+  if (isInitializing || isFetching || isLoading) return <LoadingScreen />;
+  return <MessagesPage />;
 }
 
 function LoadingScreen() {
@@ -115,6 +157,13 @@ const routeTree = rootRoute.addChildren([
   registerRoute,
   dashboardRoute,
   profileRoute,
+  marketplaceRoute,
+  storeRoute,
+  equipmentRoute,
+  cropAdvisorRoute,
+  schemesRoute,
+  messagesRoute,
+  adminRoute,
 ]);
 
 const router = createRouter({ routeTree });

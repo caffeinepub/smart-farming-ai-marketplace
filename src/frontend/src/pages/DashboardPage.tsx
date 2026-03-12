@@ -6,9 +6,8 @@ import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BookOpen,
-  Clock,
-  CloudRain,
   MessageSquare,
+  ShieldCheck,
   ShoppingCart,
   Sprout,
   Store,
@@ -23,87 +22,70 @@ import { useMyProfile } from "../hooks/useQueries";
 const modules = [
   {
     icon: Sprout,
-    title: "Crop Guidance",
+    title: "Crop Advisor",
     description:
-      "AI-powered crop recommendations, disease detection, and fertilizer advice.",
-    status: "coming-soon",
-    href: "#",
+      "AI-powered crop recommendations and disease detection for your farm.",
+    href: "/crop-advisor",
     color: "text-primary",
     bg: "bg-primary/10",
-    badgeColor: "secondary",
   },
   {
     icon: ShoppingCart,
     title: "Crop Marketplace",
     description:
       "List your crops for direct sale. Remove middlemen, earn more.",
-    status: "coming-soon",
-    href: "#",
+    href: "/marketplace",
     color: "text-accent-foreground",
     bg: "bg-accent/20",
-    badgeColor: "secondary",
   },
   {
     icon: Store,
     title: "Agriculture Store",
     description:
       "Buy seeds, fertilizers, pesticides, and tools from trusted vendors.",
-    status: "coming-soon",
-    href: "#",
+    href: "/store",
     color: "text-primary",
     bg: "bg-primary/10",
-    badgeColor: "secondary",
   },
   {
     icon: Tractor,
     title: "Equipment Rental",
     description: "Rent tractors, harvesters, and sprayers at affordable rates.",
-    status: "coming-soon",
-    href: "#",
+    href: "/equipment",
     color: "text-accent-foreground",
     bg: "bg-accent/20",
-    badgeColor: "secondary",
-  },
-  {
-    icon: CloudRain,
-    title: "Weather Alerts",
-    description:
-      "Get timely alerts for storms, frost, and heatwaves in your area.",
-    status: "coming-soon",
-    href: "#",
-    color: "text-primary",
-    bg: "bg-primary/10",
-    badgeColor: "secondary",
   },
   {
     icon: BookOpen,
     title: "Government Schemes",
     description: "PM-KISAN, crop insurance, subsidies, and loan programs.",
-    status: "coming-soon",
-    href: "#",
-    color: "text-accent-foreground",
-    bg: "bg-accent/20",
-    badgeColor: "secondary",
+    href: "/schemes",
+    color: "text-primary",
+    bg: "bg-primary/10",
   },
   {
     icon: MessageSquare,
     title: "Messages",
     description: "Chat with buyers, sellers, and equipment owners directly.",
-    status: "coming-soon",
-    href: "#",
-    color: "text-primary",
-    bg: "bg-primary/10",
-    badgeColor: "secondary",
+    href: "/messages",
+    color: "text-accent-foreground",
+    bg: "bg-accent/20",
   },
   {
     icon: User,
     title: "My Profile",
     description: "View and update your farmer profile and farm details.",
-    status: "available",
     href: "/profile",
+    color: "text-primary",
+    bg: "bg-primary/10",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Admin Panel",
+    description: "Manage users, listings, and platform content (admins only).",
+    href: "/admin",
     color: "text-accent-foreground",
     bg: "bg-accent/20",
-    badgeColor: "default",
   },
 ] as const;
 
@@ -145,7 +127,6 @@ export default function DashboardPage() {
       <Navbar />
       <main className="flex-1 py-10 px-4">
         <div className="container max-w-5xl">
-          {/* Welcome header */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -153,7 +134,6 @@ export default function DashboardPage() {
             className="mb-10"
           >
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-6 rounded-2xl bg-primary text-primary-foreground relative overflow-hidden">
-              {/* Decorative circles */}
               <div
                 aria-hidden="true"
                 className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/5"
@@ -162,13 +142,11 @@ export default function DashboardPage() {
                 aria-hidden="true"
                 className="absolute -right-4 -bottom-8 h-24 w-24 rounded-full bg-white/5"
               />
-
               <Avatar className="h-14 w-14 flex-shrink-0">
                 <AvatarFallback className="bg-white/20 text-white text-xl font-display font-bold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-
               <div className="flex-1">
                 <p className="font-body text-primary-foreground/70 text-sm">
                   {greeting()},
@@ -194,7 +172,6 @@ export default function DashboardPage() {
                   )}
                 </div>
               </div>
-
               <Link to="/profile">
                 <Button
                   variant="outline"
@@ -208,19 +185,20 @@ export default function DashboardPage() {
             </div>
           </motion.div>
 
-          {/* Modules section */}
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="font-display text-xl font-bold text-foreground">
                 Platform Modules
               </h2>
               <p className="font-body text-sm text-muted-foreground mt-0.5">
-                New features are being built — stay tuned!
+                All modules are live and ready to use
               </p>
             </div>
-            <Badge variant="outline" className="font-body text-xs">
-              <Clock className="mr-1 h-3 w-3" />
-              Module 1 Active
+            <Badge
+              variant="outline"
+              className="font-body text-xs bg-primary/5 text-primary border-primary/20"
+            >
+              All Active
             </Badge>
           </div>
 
@@ -236,60 +214,34 @@ export default function DashboardPage() {
                 variants={item}
                 data-ocid={`dashboard.item.${idx + 1}`}
               >
-                {mod.status === "available" ? (
-                  <Link to={mod.href as "/profile"}>
-                    <Card className="h-full border-border/60 shadow-xs hover:shadow-card hover:border-primary/30 transition-all duration-300 cursor-pointer group">
-                      <CardContent className="pt-5 pb-5">
-                        <div className="flex items-start justify-between mb-3">
-                          <div
-                            className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${mod.bg}`}
-                          >
-                            <mod.icon className={`h-5 w-5 ${mod.color}`} />
-                          </div>
-                          <Badge
-                            variant="default"
-                            className="font-body text-[10px] font-bold tracking-wider uppercase bg-primary/15 text-primary hover:bg-primary/20 border-0"
-                          >
-                            Available
-                          </Badge>
-                        </div>
-                        <h3 className="font-display text-sm font-bold text-foreground mb-1">
-                          {mod.title}
-                        </h3>
-                        <p className="font-body text-xs text-muted-foreground leading-relaxed">
-                          {mod.description}
-                        </p>
-                        <div className="mt-3 flex items-center text-xs font-body font-semibold text-primary gap-1 group-hover:gap-2 transition-all">
-                          Open <ArrowRight className="h-3 w-3" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ) : (
-                  <Card className="h-full border-border/40 shadow-xs opacity-70 cursor-default">
+                <Link to={mod.href}>
+                  <Card className="h-full border-border/60 shadow-xs hover:shadow-card hover:border-primary/30 transition-all duration-300 cursor-pointer group">
                     <CardContent className="pt-5 pb-5">
                       <div className="flex items-start justify-between mb-3">
                         <div
-                          className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${mod.bg} opacity-60`}
+                          className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${mod.bg}`}
                         >
                           <mod.icon className={`h-5 w-5 ${mod.color}`} />
                         </div>
                         <Badge
-                          variant="secondary"
-                          className="font-body text-[10px] font-bold tracking-wider uppercase"
+                          variant="default"
+                          className="font-body text-[10px] font-bold tracking-wider uppercase bg-primary/15 text-primary hover:bg-primary/20 border-0"
                         >
-                          Coming Soon
+                          Active
                         </Badge>
                       </div>
-                      <h3 className="font-display text-sm font-bold text-muted-foreground mb-1">
+                      <h3 className="font-display text-sm font-bold text-foreground mb-1">
                         {mod.title}
                       </h3>
-                      <p className="font-body text-xs text-muted-foreground/70 leading-relaxed">
+                      <p className="font-body text-xs text-muted-foreground leading-relaxed">
                         {mod.description}
                       </p>
+                      <div className="mt-3 flex items-center text-xs font-body font-semibold text-primary gap-1 group-hover:gap-2 transition-all">
+                        Open <ArrowRight className="h-3 w-3" />
+                      </div>
                     </CardContent>
                   </Card>
-                )}
+                </Link>
               </motion.div>
             ))}
           </motion.div>
