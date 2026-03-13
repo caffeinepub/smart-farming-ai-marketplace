@@ -44,7 +44,7 @@ export default function MessagesPage() {
   const callerPrincipal = identity?.getPrincipal().toString();
 
   const loadConversations = async () => {
-    if (!actor || !identity) return;
+    if (!actor) return;
     try {
       const convs = await actor.getMyConversations();
       setConversations(convs);
@@ -72,7 +72,7 @@ export default function MessagesPage() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     loadConversations();
-  }, [actor, identity]);
+  }, [actor]);
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     if (activeConv) {
@@ -130,26 +130,6 @@ export default function MessagesPage() {
       setSending(false);
     }
   };
-
-  if (!identity) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center p-8">
-            <MessageSquare className="h-16 w-16 mx-auto mb-4 text-primary opacity-60" />
-            <h2 className="font-display text-xl font-bold mb-2">
-              Login Required
-            </h2>
-            <p className="font-body text-muted-foreground">
-              Please login to view messages.
-            </p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

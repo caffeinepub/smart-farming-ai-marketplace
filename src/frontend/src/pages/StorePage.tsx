@@ -183,16 +183,14 @@ export default function StorePage() {
                 Seeds, fertilizers, tools and more
               </p>
             </div>
-            {identity && (
-              <Button
-                onClick={openAdd}
-                className="font-body font-semibold"
-                data-ocid="store.open_modal_button"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Product
-              </Button>
-            )}
+            <Button
+              onClick={openAdd}
+              className="font-body font-semibold"
+              data-ocid="store.open_modal_button"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product
+            </Button>
           </div>
 
           <div className="relative mb-4">
@@ -234,10 +232,7 @@ export default function StorePage() {
               data-ocid="store.empty_state"
             >
               <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p>
-                No products found.{" "}
-                {identity ? "Add the first product!" : "Login to add products."}
-              </p>
+              <p>No products found. "Add the first product!"</p>
             </div>
           ) : (
             <motion.div

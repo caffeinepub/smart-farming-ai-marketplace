@@ -1,36 +1,20 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Link } from "@tanstack/react-router";
-import {
-  ChevronDown,
-  LayoutDashboard,
-  Leaf,
-  Loader2,
-  LogOut,
-  User,
-} from "lucide-react";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
-import { useMyProfile } from "../hooks/useQueries";
+import { Leaf, Menu, X } from "lucide-react";
+import { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Navbar() {
-  const { identity, login, clear, isLoggingIn } = useInternetIdentity();
-  const { data: profile } = useMyProfile();
-  const isLoggedIn = !!identity;
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { lang, setLang, t } = useLanguage();
 
-  const initials = profile?.name
-    ? profile.name
-        .split(" ")
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "F";
+  const NAV_LINKS = [
+    { to: "/marketplace", label: t("nav_marketplace") },
+    { to: "/store", label: t("nav_store") },
+    { to: "/equipment", label: t("nav_equipment") },
+    { to: "/schemes", label: t("nav_schemes") },
+    { to: "/crop-advisor", label: t("nav_crop_advisor") },
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/90 backdrop-blur-md">
@@ -50,73 +34,75 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Nav actions */}
-        <div className="flex items-center gap-2">
-          {!isLoggedIn ? (
-            <Button
-              onClick={login}
-              disabled={isLoggingIn}
-              className="font-body font-semibold"
-              data-ocid="nav.primary_button"
+        {/* Desktop Nav Links */}
+        <nav className="hidden md:flex items-center gap-1">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="px-3 py-1.5 rounded-md font-body text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              data-ocid="nav.link"
             >
-              {isLoggingIn ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              {isLoggingIn ? "Connecting..." : "Login / Register"}
-            </Button>
-          ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-2 font-body"
-                  data-ocid="nav.dropdown_menu"
-                >
-                  <Avatar className="h-7 w-7">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="hidden sm:inline text-sm font-medium">
-                    {profile?.name ?? "My Account"}
-                  </span>
-                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/dashboard"
-                    className="flex items-center gap-2"
-                    data-ocid="nav.link"
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/profile"
-                    className="flex items-center gap-2"
-                    data-ocid="nav.link"
-                  >
-                    <User className="h-4 w-4" />
-                    My Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={clear}
-                  className="flex items-center gap-2 text-destructive focus:text-destructive"
-                  data-ocid="nav.delete_button"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          {/* Language Toggle */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLang(lang === "en" ? "hi" : "en")}
+            className="font-body font-semibold text-xs h-8 px-3 hidden md:flex"
+            data-ocid="lang.toggle"
+          >
+            {lang === "en" ? "हिंदी" : "EN"}
+          </Button>
+
+          {/* Mobile menu toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileOpen((v) => !v)}
+            data-ocid="nav.toggle"
+          >
+            {mobileOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </div>
+
+      {/* Mobile Nav */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border/60 bg-card/95 px-4 py-3 flex flex-col gap-1">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="px-3 py-2 rounded-md font-body text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              onClick={() => setMobileOpen(false)}
+              data-ocid="nav.link"
+            >
+              {link.label}
+            </Link>
+          ))}
+          {/* Language Toggle Mobile */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLang(lang === "en" ? "hi" : "en")}
+            className="font-body font-semibold text-xs mt-2 w-full"
+            data-ocid="lang.toggle"
+          >
+            {lang === "en" ? "हिंदी में देखें" : "View in English"}
+          </Button>
+        </div>
+      )}
     </header>
   );
 }

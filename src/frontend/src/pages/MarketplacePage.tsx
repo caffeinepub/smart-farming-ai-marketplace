@@ -209,15 +209,13 @@ export default function MarketplacePage() {
                 Buy and sell crops directly
               </p>
             </div>
-            {identity && (
-              <Button
-                onClick={openAdd}
-                className="font-body font-semibold"
-                data-ocid="marketplace.open_modal_button"
-              >
-                <Plus className="h-4 w-4 mr-2" /> Add Listing
-              </Button>
-            )}
+            <Button
+              onClick={openAdd}
+              className="font-body font-semibold"
+              data-ocid="marketplace.open_modal_button"
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add Listing
+            </Button>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -261,12 +259,7 @@ export default function MarketplacePage() {
               data-ocid="marketplace.empty_state"
             >
               <Tag className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p>
-                No listings found.{" "}
-                {identity
-                  ? "Be the first to add one!"
-                  : "Login to add listings."}
-              </p>
+              <p>No listings found. "Be the first to add one!"</p>
             </div>
           ) : (
             <motion.div

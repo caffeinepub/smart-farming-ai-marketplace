@@ -1,7 +1,6 @@
 @font-face {
-  font-family: "Bricolage Grotesque";
-  src: url("/assets/fonts/BricolageGrotesque[opsz,wdth,wght].woff2")
-    format("woff2");
+  font-family: "Fraunces";
+  src: url("/assets/fonts/Fraunces[SOFT,WONK,opsz,wght].woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -106,11 +105,42 @@
     border-radius: inherit;
   }
 
-  .clip-hero {
-    clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
-  }
-
   .text-balance {
     text-wrap: balance;
+  }
+
+  .golden-text {
+    background: linear-gradient(90deg, oklch(0.88 0.18 78), oklch(0.76 0.16 68));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 28s linear infinite;
+  }
+
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .step-connector {
+    position: relative;
+  }
+  .step-connector::after {
+    content: "";
+    position: absolute;
+    top: 28px;
+    left: calc(50% + 28px);
+    right: calc(-50% + 28px);
+    height: 2px;
+    border-top: 2px dashed oklch(0.38 0.12 148 / 0.3);
   }
 }

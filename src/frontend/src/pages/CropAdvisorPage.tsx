@@ -43,7 +43,6 @@ const SEASONS = ["Kharif", "Rabi", "Zaid"];
 export default function CropAdvisorPage() {
   const { actor: rawActor } = useActor();
   const actor = rawActor as unknown as ExtendedBackend;
-  const { identity } = useInternetIdentity();
   const [recForm, setRecForm] = useState({
     soilType: "Loam",
     season: "Kharif",
@@ -66,7 +65,7 @@ export default function CropAdvisorPage() {
   const [loadingDisease, setLoadingDisease] = useState(false);
 
   const load = async () => {
-    if (!actor || !identity) return;
+    if (!actor) return;
     try {
       const [recs, dreps] = await Promise.all([
         actor.getMyRecommendations(),
@@ -82,7 +81,7 @@ export default function CropAdvisorPage() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     load();
-  }, [actor, identity]);
+  }, [actor]);
 
   const handleGetRecommendation = async () => {
     if (!actor) return;
@@ -129,26 +128,6 @@ export default function CropAdvisorPage() {
       setLoadingDisease(false);
     }
   };
-
-  if (!identity) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center p-8">
-            <Sprout className="h-16 w-16 mx-auto mb-4 text-primary opacity-60" />
-            <h2 className="font-display text-xl font-bold mb-2">
-              Login Required
-            </h2>
-            <p className="font-body text-muted-foreground">
-              Please login to use Crop Advisor features.
-            </p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

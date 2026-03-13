@@ -1,6 +1,8 @@
 import { Leaf } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
   const year = new Date().getFullYear();
   const utmLink = `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`;
 
@@ -26,9 +28,7 @@ export default function Footer() {
             caffeine.ai
           </a>
         </p>
-        <p className="text-xs text-muted-foreground">
-          Empowering Indian Farmers
-        </p>
+        <p className="text-xs text-muted-foreground">{t("footer_tagline")}</p>
       </div>
     </footer>
   );

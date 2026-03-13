@@ -16,8 +16,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Bricolage Grotesque', 'sans-serif'],
-        body: ['General Sans', 'sans-serif'],
+        display: ["Fraunces", "Georgia", "serif"],
+        fraunces: ["Fraunces", "Georgia", "serif"],
+        body: ["General Sans", "sans-serif"],
       },
       colors: {
         border: "oklch(var(--border))",
@@ -80,6 +81,8 @@ export default {
         xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
         field: "0 1px 3px 0 oklch(0.38 0.12 148 / 0.10)",
         card: "0 4px 24px 0 oklch(0.38 0.12 148 / 0.08), 0 1px 4px 0 oklch(0.38 0.12 148 / 0.05)",
+        "card-hover": "0 12px 40px 0 oklch(0.38 0.12 148 / 0.14), 0 2px 8px 0 oklch(0.38 0.12 148 / 0.08)",
+        "stats": "0 8px 32px 0 oklch(0.18 0.025 60 / 0.18), 0 2px 8px 0 oklch(0.18 0.025 60 / 0.08)",
       },
       keyframes: {
         "accordion-down": {
