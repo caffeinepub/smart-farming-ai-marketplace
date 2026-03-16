@@ -15,7 +15,8 @@ import {
   TrendingUp,
   UserPlus,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useInView } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
@@ -30,9 +31,11 @@ const features = [
     description:
       "Get AI-powered recommendations for crops, fertilizers, and disease detection tailored to your soil and season.",
     badge: "AI Powered",
-    gradient: "from-emerald-50 to-green-100",
-    iconBg: "bg-primary/10",
-    iconColor: "text-primary",
+    gradient: "from-emerald-500/15 via-green-400/10 to-teal-500/20",
+    iconBg: "bg-emerald-500",
+    iconColor: "text-white",
+    glowColor: "rgba(16,185,129,0.35)",
+    countChip: null,
   },
   {
     icon: ShoppingCart,
@@ -40,9 +43,11 @@ const features = [
     description:
       "Sell your harvest directly to buyers — no middlemen, better prices, more profit for your family.",
     badge: "Direct Sales",
-    gradient: "from-amber-50 to-yellow-100",
-    iconBg: "bg-accent/20",
-    iconColor: "text-amber-700",
+    gradient: "from-amber-500/15 via-yellow-400/10 to-orange-500/20",
+    iconBg: "bg-amber-500",
+    iconColor: "text-white",
+    glowColor: "rgba(245,158,11,0.35)",
+    countChip: "2,400+ crops listed",
   },
   {
     icon: Tractor,
@@ -50,9 +55,11 @@ const features = [
     description:
       "Rent tractors, harvesters, and seeders from nearby farmers at affordable daily or hourly rates.",
     badge: "Save Money",
-    gradient: "from-sky-50 to-blue-100",
-    iconBg: "bg-sky-100",
-    iconColor: "text-sky-700",
+    gradient: "from-sky-500/15 via-blue-400/10 to-cyan-500/20",
+    iconBg: "bg-sky-500",
+    iconColor: "text-white",
+    glowColor: "rgba(14,165,233,0.35)",
+    countChip: "500+ tractors available",
   },
   {
     icon: CloudRain,
@@ -60,9 +67,11 @@ const features = [
     description:
       "Receive timely alerts for storms, frost, and heatwaves so you can protect your crops before damage occurs.",
     badge: "Stay Safe",
-    gradient: "from-indigo-50 to-violet-100",
-    iconBg: "bg-indigo-100",
-    iconColor: "text-indigo-700",
+    gradient: "from-indigo-500/15 via-violet-400/10 to-purple-500/20",
+    iconBg: "bg-indigo-500",
+    iconColor: "text-white",
+    glowColor: "rgba(99,102,241,0.35)",
+    countChip: null,
   },
   {
     icon: BookOpen,
@@ -70,9 +79,11 @@ const features = [
     description:
       "Discover PM-KISAN, crop insurance, subsidies, and loan programs available to farmers in your state.",
     badge: "Free Benefits",
-    gradient: "from-rose-50 to-pink-100",
-    iconBg: "bg-rose-100",
-    iconColor: "text-rose-700",
+    gradient: "from-rose-500/15 via-pink-400/10 to-red-500/20",
+    iconBg: "bg-rose-500",
+    iconColor: "text-white",
+    glowColor: "rgba(244,63,94,0.35)",
+    countChip: null,
   },
   {
     icon: MessageSquare,
@@ -80,9 +91,11 @@ const features = [
     description:
       "Chat directly with buyers, equipment owners, and sellers to negotiate deals without phone calls.",
     badge: "Connect",
-    gradient: "from-teal-50 to-cyan-100",
-    iconBg: "bg-teal-100",
-    iconColor: "text-teal-700",
+    gradient: "from-teal-500/15 via-cyan-400/10 to-emerald-500/20",
+    iconBg: "bg-teal-500",
+    iconColor: "text-white",
+    glowColor: "rgba(20,184,166,0.35)",
+    countChip: null,
   },
 ];
 
@@ -91,6 +104,14 @@ const stats = [
   { value: "₹2.4Cr", label: "Crops Sold", emoji: "💰" },
   { value: "500+", label: "Equipment Listings", emoji: "🚜" },
   { value: "28", label: "States Covered", emoji: "🗺️" },
+];
+
+const liveNumbers = [
+  { value: 10000, suffix: "+", label: "Farmers", emoji: "👨\u200d🌾" },
+  { value: 2.4, suffix: "Cr", prefix: "₹", label: "Crops Sold", emoji: "💰" },
+  { value: 500, suffix: "+", label: "Equipment", emoji: "🚜" },
+  { value: 28, suffix: "", label: "States", emoji: "🗺️" },
+  { value: 4.9, suffix: "★", label: "Rating", emoji: "⭐" },
 ];
 
 const trustBadges = [
@@ -149,6 +170,25 @@ const testimonials = [
   },
 ];
 
+// Social proof avatars for CTA
+const ctaAvatars = [
+  {
+    id: "av-ramesh",
+    type: "img",
+    src: "/assets/generated/farmer-testimonial-1.dim_400x400.jpg",
+    alt: "Ramesh",
+  },
+  {
+    id: "av-sunita",
+    type: "img",
+    src: "/assets/generated/farmer-testimonial-2.dim_400x400.jpg",
+    alt: "Sunita",
+  },
+  { id: "av-rk", type: "initials", initials: "RK", bg: "bg-emerald-600" },
+  { id: "av-as", type: "initials", initials: "AS", bg: "bg-amber-500" },
+  { id: "av-mp", type: "initials", initials: "MP", bg: "bg-sky-500" },
+];
+
 // ─── Animation Variants ───────────────────────────────────────────────────────
 
 const containerVariants = {
@@ -164,6 +204,55 @@ const itemVariants = {
     transition: { duration: 0.55, ease: "easeOut" as const },
   },
 };
+
+// ─── Animated Counter ─────────────────────────────────────────────────────────
+
+function AnimatedCounter({
+  target,
+  suffix,
+  prefix,
+  decimals = 0,
+}: {
+  target: number;
+  suffix: string;
+  prefix?: string;
+  decimals?: number;
+}) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  useEffect(() => {
+    if (!inView) return;
+    const duration = 1800;
+    const steps = 60;
+    const increment = target / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(current);
+      }
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [inView, target]);
+
+  const display =
+    decimals > 0
+      ? count.toFixed(decimals)
+      : Math.floor(count).toLocaleString("en-IN");
+
+  return (
+    <span ref={ref}>
+      {prefix}
+      {display}
+      {suffix}
+    </span>
+  );
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -197,12 +286,22 @@ export default function LandingPage() {
           aria-hidden="true"
         />
 
-        {/* Deep gradient overlay */}
+        {/* Deep forest green gradient overlay */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(175deg, oklch(0.20 0.10 148 / 0.88) 0%, oklch(0.25 0.10 148 / 0.80) 40%, oklch(0.15 0.06 148 / 0.95) 100%)",
+              "linear-gradient(175deg, oklch(0.20 0.10 148 / 0.82) 0%, oklch(0.25 0.10 148 / 0.72) 40%, oklch(0.15 0.06 148 / 0.92) 100%)",
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Golden harvest warm overlay — Fix 1 */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(160deg, oklch(0.75 0.16 78 / 0.18) 0%, transparent 55%, oklch(0.60 0.14 65 / 0.12) 100%)",
           }}
           aria-hidden="true"
         />
@@ -235,20 +334,37 @@ export default function LandingPage() {
             </span>
           </motion.div>
 
-          {/* Main headline */}
+          {/* Main headline — Fix 1: larger on lg, text-shadow glow */}
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.75, ease: "easeOut", delay: 0.15 }}
           >
-            <h1 className="font-fraunces font-black leading-[1.05] text-white text-balance">
-              <span className="block text-5xl md:text-7xl lg:text-8xl">
+            <h1 className="font-fraunces font-black leading-[1.02] text-white text-balance">
+              <span
+                className="block text-5xl md:text-7xl lg:text-9xl"
+                style={{
+                  textShadow:
+                    "0 0 60px rgba(255,255,255,0.12), 0 2px 20px rgba(0,0,0,0.5)",
+                }}
+              >
                 Grow More.
               </span>
-              <span className="block text-5xl md:text-7xl lg:text-8xl mt-1">
+              <span
+                className="block text-5xl md:text-7xl lg:text-9xl mt-1"
+                style={{
+                  textShadow:
+                    "0 0 60px rgba(255,255,255,0.12), 0 2px 20px rgba(0,0,0,0.5)",
+                }}
+              >
                 Earn More.
               </span>
-              <span className="block text-5xl md:text-7xl lg:text-8xl mt-1 golden-text">
+              <span
+                className="block text-5xl md:text-7xl lg:text-9xl mt-1 golden-text"
+                style={{
+                  filter: "drop-shadow(0 0 28px oklch(0.85 0.22 78 / 0.6))",
+                }}
+              >
                 Farm Smarter.
               </span>
             </h1>
@@ -348,6 +464,36 @@ export default function LandingPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Fix 1: Floating scroll-down wheat indicator */}
+        <motion.div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
+          aria-hidden="true"
+        >
+          <motion.span
+            className="text-3xl"
+            animate={{ y: [0, 8, 0] }}
+            transition={{
+              duration: 2.2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+          >
+            🌾
+          </motion.span>
+          <motion.div
+            className="h-6 w-px bg-white/30"
+            animate={{ scaleY: [0.4, 1, 0.4] }}
+            transition={{
+              duration: 2.2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+          />
+        </motion.div>
       </section>
 
       {/* ── TRUST MARQUEE ──────────────────────────────────────────────────── */}
@@ -402,28 +548,51 @@ export default function LandingPage() {
                 key={feat.title}
                 variants={itemVariants}
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className={`group bg-gradient-to-br ${feat.gradient} border border-border/50 rounded-2xl p-7 hover:shadow-card-hover hover:border-primary/20 transition-all duration-300 cursor-default`}
+                className={`group relative bg-gradient-to-br ${feat.gradient} border border-white/40 rounded-2xl p-7 hover:border-white/60 transition-all duration-300 cursor-default overflow-hidden`}
+                style={{
+                  boxShadow: `0 4px 24px ${feat.glowColor}, 0 1px 4px rgba(0,0,0,0.06)`,
+                }}
                 data-ocid={`features.item.${idx + 1}`}
               >
+                {/* Fix 2: Glowing ring behind icon */}
                 <div
-                  className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${feat.iconBg} mb-5`}
-                >
-                  <feat.icon className={`h-6 w-6 ${feat.iconColor}`} />
-                </div>
-                <Badge
-                  variant="secondary"
-                  className="mb-3 font-body text-[10px] font-bold tracking-wider uppercase bg-white/60"
-                >
-                  {feat.badge}
-                </Badge>
-                <h3 className="font-fraunces text-xl font-bold text-foreground mb-2.5">
-                  {feat.title}
-                </h3>
-                <p className="font-body text-sm text-foreground/65 leading-relaxed">
-                  {feat.description}
-                </p>
-                <div className="mt-4 flex items-center gap-1 font-body text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  Learn more <ArrowRight className="h-3 w-3" />
+                  className="absolute top-5 left-5 h-16 w-16 rounded-full blur-xl opacity-50 transition-opacity duration-300 group-hover:opacity-80"
+                  style={{ background: feat.glowColor }}
+                  aria-hidden="true"
+                />
+
+                <div className="relative">
+                  <div
+                    className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${feat.iconBg} mb-5 shadow-lg`}
+                    style={{ boxShadow: `0 4px 16px ${feat.glowColor}` }}
+                  >
+                    <feat.icon className={`h-6 w-6 ${feat.iconColor}`} />
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <Badge
+                      variant="secondary"
+                      className="font-body text-[10px] font-bold tracking-wider uppercase bg-white/70 backdrop-blur-sm"
+                    >
+                      {feat.badge}
+                    </Badge>
+                    {/* Fix 2: Count chip */}
+                    {feat.countChip && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[10px] font-body font-bold text-primary">
+                        📊 {feat.countChip}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="font-fraunces text-xl font-bold text-foreground mb-2.5">
+                    {feat.title}
+                  </h3>
+                  <p className="font-body text-sm text-foreground/65 leading-relaxed">
+                    {feat.description}
+                  </p>
+                  <div className="mt-4 flex items-center gap-1 font-body text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    Learn more <ArrowRight className="h-3 w-3" />
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -465,12 +634,9 @@ export default function LandingPage() {
             whileInView="show"
             viewport={{ once: true }}
           >
-            {/* Connecting dashed lines — desktop only */}
             <div
               className="hidden md:block absolute top-12 left-[calc(16.67%+28px)] right-[calc(16.67%+28px)] h-px"
-              style={{
-                borderTop: "2px dashed oklch(0.38 0.12 148 / 0.25)",
-              }}
+              style={{ borderTop: "2px dashed oklch(0.38 0.12 148 / 0.25)" }}
               aria-hidden="true"
             />
 
@@ -481,7 +647,6 @@ export default function LandingPage() {
                 className="flex flex-col items-center text-center"
                 data-ocid={`how_it_works.item.${idx + 1}`}
               >
-                {/* Numbered circle */}
                 <div className="relative mb-6">
                   <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
                     <step.icon className="h-7 w-7 text-primary-foreground" />
@@ -497,6 +662,78 @@ export default function LandingPage() {
                 </h3>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed max-w-xs">
                   {step.description}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── LIVE PLATFORM NUMBERS ─────────────────────────────────────────── */}
+      <section
+        className="py-20 relative overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(135deg, oklch(0.22 0.10 148) 0%, oklch(0.28 0.12 148) 50%, oklch(0.20 0.08 160) 100%)",
+        }}
+      >
+        {/* Decorative bg rings */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 50%, oklch(0.78 0.14 78) 0%, transparent 50%), radial-gradient(circle at 80% 50%, oklch(0.55 0.12 148) 0%, transparent 50%)",
+          }}
+          aria-hidden="true"
+        />
+        <div className="container relative z-10">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-body font-bold text-white/80 tracking-widest uppercase mb-3">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+              Live Platform Stats
+            </span>
+            <h2 className="font-fraunces text-3xl md:text-4xl font-black text-white">
+              Numbers That Tell Our Story
+            </h2>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-4"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+          >
+            {liveNumbers.map((num, idx) => (
+              <motion.div
+                key={num.label}
+                variants={itemVariants}
+                className="text-center"
+                data-ocid={`live_stats.item.${idx + 1}`}
+              >
+                <div className="text-3xl mb-2">{num.emoji}</div>
+                <p
+                  className="font-fraunces font-black text-white leading-none"
+                  style={{
+                    fontSize: "clamp(2rem, 4vw, 3.5rem)",
+                    textShadow: "0 0 30px rgba(255,255,255,0.2)",
+                  }}
+                >
+                  <AnimatedCounter
+                    target={num.value}
+                    suffix={num.suffix}
+                    prefix={num.prefix}
+                    decimals={num.value % 1 !== 0 ? 1 : 0}
+                  />
+                </p>
+                <p className="font-body text-sm text-white/60 mt-1.5 font-medium">
+                  {num.label}
                 </p>
               </motion.div>
             ))}
@@ -540,9 +777,18 @@ export default function LandingPage() {
                 key={t.name}
                 variants={itemVariants}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="bg-card border border-border/60 rounded-3xl p-8 shadow-card hover:shadow-card-hover transition-all"
+                className="relative bg-card border border-border/60 rounded-3xl p-8 shadow-card hover:shadow-card-hover transition-all overflow-hidden"
                 data-ocid={`testimonials.item.${idx + 1}`}
               >
+                {/* Fix 3: Large decorative quote mark background */}
+                <div
+                  className="absolute top-2 right-6 font-fraunces font-black text-primary/8 leading-none select-none pointer-events-none"
+                  style={{ fontSize: "10rem" }}
+                  aria-hidden="true"
+                >
+                  &ldquo;
+                </div>
+
                 {/* Stars */}
                 <div className="flex gap-0.5 mb-5">
                   {Array.from({ length: t.rating }, (_, pos) => pos + 1).map(
@@ -556,7 +802,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Quote */}
-                <p className="font-body text-base text-foreground/80 leading-relaxed mb-6 italic">
+                <p className="relative font-body text-base text-foreground/80 leading-relaxed mb-6 italic">
                   &ldquo;{t.quote}&rdquo;
                 </p>
 
@@ -565,13 +811,20 @@ export default function LandingPage() {
                   <img
                     src={t.image}
                     alt={t.name}
-                    className="h-14 w-14 rounded-full object-cover ring-2 ring-primary/20"
+                    className="h-14 w-14 rounded-full object-cover ring-2 ring-primary/30 shadow-md"
                     loading="lazy"
                   />
                   <div>
-                    <p className="font-fraunces font-bold text-foreground text-base">
-                      {t.name}
-                    </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-fraunces font-bold text-foreground text-base">
+                        {t.name}
+                      </p>
+                      {/* Fix 3: Verified Farmer badge */}
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 border border-emerald-300 px-2 py-0.5 text-[10px] font-body font-bold text-emerald-700">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Verified Farmer
+                      </span>
+                    </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-body font-semibold text-primary">
                         📍 {t.location}
@@ -621,7 +874,37 @@ export default function LandingPage() {
               Join 10,000+ farmers already using Smart Farming AI Marketplace to
               increase their income and reduce losses.
             </p>
-            <div className="mt-10">
+
+            {/* Social proof avatars */}
+            <div className="mt-8 flex items-center justify-center gap-1">
+              <div className="flex -space-x-3">
+                {ctaAvatars.map((av) =>
+                  av.type === "img" ? (
+                    <img
+                      key={av.id}
+                      src={av.src}
+                      alt={av.alt}
+                      className="h-10 w-10 rounded-full object-cover ring-2 ring-white/30"
+                    />
+                  ) : (
+                    <div
+                      key={av.id}
+                      className={`h-10 w-10 rounded-full ${av.bg} ring-2 ring-white/30 flex items-center justify-center`}
+                    >
+                      <span className="font-fraunces text-xs font-black text-white">
+                        {av.initials}
+                      </span>
+                    </div>
+                  ),
+                )}
+              </div>
+              <p className="ml-3 font-body text-sm text-white/70">
+                <span className="font-bold text-white">10,000+</span> farmers
+                already joined
+              </p>
+            </div>
+
+            <div className="mt-8">
               <Button
                 size="lg"
                 onClick={handleGetStarted}
